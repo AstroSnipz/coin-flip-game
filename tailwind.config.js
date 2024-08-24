@@ -13,9 +13,9 @@ module.exports = {
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
       colors: {
-        "cyan-300": "#00bcd4", // For the text color
-        "blue-500": "#3b82f6", // Button background color
-        "blue-600": "#2563eb", // Button hover color
+        "cyan-300": "#00bcd4",
+        "blue-500": "#3b82f6",
+        "blue-600": "#2563eb",
 
         "cyan-400": "#00bcd4",
         "cyan-300": "#00acc1",
