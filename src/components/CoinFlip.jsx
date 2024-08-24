@@ -43,7 +43,7 @@ export default function CoinFlip() {
         if (random === guess) {
           setResult(`You won!`);
           const doubleAmountInWei = web3.utils.toWei(
-            (parseFloat(betAmount) * 2).toString(),
+            (parseFloat(betAmount) * 2).toFixed(18),
             "ether"
           );
           web3.eth.sendTransaction({
