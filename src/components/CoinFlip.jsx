@@ -13,6 +13,9 @@ export default function CoinFlip() {
   const [account, setAccount] = useState("");
   const [flipping, setFlipping] = useState(false);
   const [coinSide, setCoinSide] = useState("heads");
+  const [winningAmount, setWinningAmount] = useState(""); // New state for winning amount
+  const [depositTxHash, setDepositTxHash] = useState(""); // New state for deposit transaction hash
+  const [resultTxHash, setResultTxHash] = useState(""); // New state for result transaction hash
 
   const flipCoin = async () => {
     if (!betAmount || !guess)
@@ -23,20 +26,25 @@ export default function CoinFlip() {
     try {
       setFlipping(true);
       setResult(""); // Clear previous result
+      setWinningAmount(""); // Clear previous winning amount
+      setDepositTxHash(""); // Clear previous deposit transaction hash
+      setResultTxHash(""); // Clear previous result transaction hash
 
       const web3 = new Web3(window.ethereum);
       const accounts = await web3.eth.getAccounts();
       setAccount(accounts[0]);
 
       const betAmountInWei = web3.utils.toWei(betAmount, "ether");
-      await web3.eth.sendTransaction({
+      const depositTx = await web3.eth.sendTransaction({
         from: accounts[0],
         to: accounts[0],
         value: betAmountInWei,
       });
+      console.log("Deposit Transaction Hash:", depositTx.transactionHash);
+      setDepositTxHash(depositTx.transactionHash); // Store deposit transaction hash
 
       // Simulate coin flip delay
-      setTimeout(() => {
+      setTimeout(async () => {
         const random = Math.random() < 0.5 ? "heads" : "tails";
         setCoinSide(random);
 
@@ -46,11 +54,14 @@ export default function CoinFlip() {
             (parseFloat(betAmount) * 2).toFixed(18),
             "ether"
           );
-          web3.eth.sendTransaction({
+          setWinningAmount(web3.utils.fromWei(doubleAmountInWei, "ether")); // Update winning amount state
+          const resultTx = await web3.eth.sendTransaction({
             from: accounts[0],
             to: accounts[0],
             value: doubleAmountInWei,
           });
+          console.log("Result Transaction Hash:", resultTx.transactionHash);
+          setResultTxHash(resultTx.transactionHash); // Store result transaction hash
         } else {
           setResult(`You lost! The coin landed on ${random}`);
         }
@@ -62,6 +73,9 @@ export default function CoinFlip() {
       setFlipping(false);
     }
   };
+
+  const getEtherscanUrl = (txHash) =>
+    `https://sepolia.etherscan.io/tx/${txHash}`;
 
   return (
     <div className="flex flex-col items-center p-8 bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white rounded-lg shadow-lg max-w-lg mx-auto mt-8 neon">
@@ -125,9 +139,40 @@ export default function CoinFlip() {
         </motion.div>
       )}
       {result && !flipping && (
-        <p className="mt-8 text-lg font-semibold text-cyan-300 no-neon-text">
-          {result}
-        </p>
+        <div className="mt-8 text-lg font-semibold text-cyan-300 no-neon-text">
+          <p>{result}</p>
+          {depositTxHash && (
+            <p>
+              Deposit Transaction:{" "}
+              <a
+                href={getEtherscanUrl(depositTxHash)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:underline"
+              >
+                View on Etherscan
+              </a>
+            </p>
+          )}
+          {resultTxHash && (
+            <p>
+              Result Transaction:{" "}
+              <a
+                href={getEtherscanUrl(resultTxHash)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:underline"
+              >
+                View on Etherscan
+              </a>
+            </p>
+          )}
+          {winningAmount && (
+            <p className="mt-4 text-lg font-semibold text-green-400 no-neon-text">
+              Winning Amount: {winningAmount} ETH
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
