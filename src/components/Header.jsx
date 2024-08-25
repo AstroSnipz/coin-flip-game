@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Web3 from "web3";
 import { motion } from "framer-motion";
 
 export default function Header({ onAnimationComplete }) {
   const [account, setAccount] = useState("");
 
-  // Function to connect the wallet
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
@@ -16,7 +15,6 @@ export default function Header({ onAnimationComplete }) {
           method: "eth_requestAccounts",
         });
         setAccount(accounts[0]);
-        localStorage.setItem("walletAccount", accounts[0]); // Store account in localStorage
       } catch (error) {
         console.error("Error connecting wallet:", error);
         alert("Failed to connect wallet.");
@@ -25,19 +23,6 @@ export default function Header({ onAnimationComplete }) {
       alert("MetaMask not detected!");
     }
   };
-
-  // Function to load the wallet account from localStorage
-  const loadAccountFromLocalStorage = () => {
-    const storedAccount = localStorage.getItem("walletAccount");
-    if (storedAccount) {
-      setAccount(storedAccount);
-    }
-  };
-
-  // Load the account when the component mounts
-  useEffect(() => {
-    loadAccountFromLocalStorage();
-  }, []);
 
   return (
     <motion.div
